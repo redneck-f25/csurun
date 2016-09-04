@@ -1,14 +1,9 @@
 @echo off
 setlocal enableextensions enabledelayedexpansion
 
-set /a t=( ( %RANDOM% * %RANDOM% ) %% 900000 + 100000 )
-set t=%SystemRoot%\csurun-install-%t%
-( set -p "x=" <nul >%t% ) 2>nul || (
-	surun "%~dpnx0" && goto test
-	echo\installation canceled>&2
-	exit /b 1
-)
-del %t%
+where "surun.exe" >nul 2>nul || goto no_surun
+net session >nul 2>nul || goto sudo
+
 pushd "%~dp0\.."
 if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
 	cd x64
@@ -27,9 +22,16 @@ echo\
 pause
 exit /b
 
-:test
-echo\
-echo\wait until installation has finished
 pause
-csurun cmd /c "mklink /d "%t%" . && rmdir "%t%""
+exit /b
+
+
+:sudo
+surun "%~0"
+exit /b
+
+:no_surun
+
+echo\SuRun not found.
 pause
+exit /b
