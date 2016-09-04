@@ -75,6 +75,7 @@ int main()
 	wchar_t pipename[PIPENAME_LEN];
 	DWORD exitCode;
 	int nh = 0;
+	DWORD res;
 
 	GetModuleFileName(NULL, helper_bin, 2047);
 	pch = wcsrchr(helper_bin, L'.');
@@ -88,14 +89,10 @@ int main()
 	{
 		return 1;
 	}
-	if (!CreateProcess(NULL, application, NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, NULL, &si, &pi))
-	{
+	res = SearchPath(NULL, application, L".exe", 2048, application_full, NULL);
+	if (res == 0 || res >= 2048) {
 		return 1;
 	}
-	GetModuleFileNameEx(pi.hProcess, NULL, application_full, 2047);
-	TerminateProcess(pi.hProcess, 0);
-	CloseHandle(pi.hProcess);
-	CloseHandle(pi.hThread);
 
 	StringCchPrintf(surun_cmdline, 2048, CMDLINE_INVOKE_FMT,
 			helper_bin, GetCurrentProcessId(), application_full, commandLine);
